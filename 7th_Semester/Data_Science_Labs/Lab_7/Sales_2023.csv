@@ -1,0 +1,4 @@
+OrderID,CustomerID,Product,Quantity,UnitPrice
+1001,C01,Laptop,1,85000
+1002,C02,Mouse,3,1500
+1003,C03,Keyboard,2,3500
