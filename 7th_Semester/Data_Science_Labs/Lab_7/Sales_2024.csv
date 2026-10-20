@@ -1,0 +1,5 @@
+OrderID,CustomerID,Product,Qty,UnitPrice
+2001,C01,Monitor,1,42000
+2002,C04,Mouse,5,1500
+2003,C02,Laptop,1,N/A
+2004,C05,Headphones,2,4000
