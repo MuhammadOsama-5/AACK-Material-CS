@@ -1,0 +1,76 @@
+CS-402L Data Science Lab - Lab 9 Notes
+Linear and Polynomial Regression, Cross-Validation, and Ridge Grid Search
+Reg# 235140
+
+==================================================================
+Task 1 - Estimate Housing Prices Near Transit (task1_housing.py)
+==================================================================
+Data: UCI Real Estate Valuation, 414 rows.
+Feature: distance to nearest MRT station in units of 100 m.
+Target: price per unit area (10,000 NT$ per ping).
+
+(a) Slope:     -0.7262 price units per 100 m
+    Intercept: 45.8514 price units
+
+(b) Predicted price at 500 m (distance_100m = 5): 42.22 price units
+
+(c) The slope is negative, so price goes down as the house gets farther
+    from the MRT station. Each extra 100 m lowers the predicted price by
+    about 0.73 units, which is about 7,262 NT$ per ping. For example, a
+    house 1 km farther away is predicted to cost about 7.3 units less
+    per ping. The plot (task1_housing.png) shows the points dropping
+    quickly near the station and the straight line following that trend.
+
+==================================================================
+Task 2 - Compare Models for Yacht Resistance (task2_yacht.py)
+==================================================================
+Data: UCI Yacht Hydrodynamics, 308 rows.
+Feature: Froude number (column 5). Target: residuary resistance (column 6).
+Same 5 shuffled folds (random_state=42), negative RMSE scoring.
+
+Model        Fold RMSEs                          Mean
+Linear       8.16  10.57  9.84  8.38  7.78       8.95
+Quadratic    3.93   4.59  4.45  4.49  3.50       4.19
+
+Better model: Quadratic. Its mean CV RMSE (4.19) is less than half of the
+linear model's (8.95), and it wins on every fold. Resistance rises sharply
+at higher speed, so a curved line fits much better than a straight one.
+Note: this row-based split can put experiments from the same hull in
+different folds, so the scores may be a bit optimistic.
+
+==================================================================
+Task 3 - Tune a Concrete Strength Model (task3_concrete.py)
+==================================================================
+Data: UCI Concrete Compressive Strength, 1005 rows after removing
+duplicates. 804 training rows and 201 test rows (random_state=42).
+
+(a) Linear baseline fold RMSEs: 10.10  10.18  10.05  10.18  10.49
+    Linear baseline mean CV RMSE: 10.20 MPa
+
+(b) Grid search over degree [1, 2, 3] and alpha [0.01, 0.1, 1, 10, 100]
+    Top 3 settings:
+      Rank 1: degree=3, alpha=0.1   mean CV RMSE = 6.09 MPa
+      Rank 2: degree=3, alpha=0.01  mean CV RMSE = 6.16 MPa
+      Rank 3: degree=3, alpha=1     mean CV RMSE = 6.27 MPa
+    Best: degree=3, alpha=0.1
+
+(c) Refitted winner on the held-out test set:
+      Test RMSE: 6.52 MPa
+      Test MAE:  4.67 MPa
+    The plot (task3_concrete.png) shows most points close to the y = x
+    line, with bigger misses at high strengths.
+
+(d) The tuned model lowers mean CV RMSE from 10.20 to 6.09 MPa, an
+    improvement of about 4.11 MPa. The test RMSE (6.52) is close to the
+    CV RMSE, so the model is not badly overfitting.
+
+    Interaction term example: Cement x Water. It lets the effect of
+    cement depend on how much water is in the mix (the water-cement
+    ratio matters a lot for strength).
+
+    Why scaling goes inside the pipeline: Polynomial terms have very
+    different sizes, and Ridge penalizes all coefficients equally, so
+    features must be scaled first. Putting StandardScaler inside the
+    pipeline means it is fitted only on the training folds in each CV
+    round, so no information from the validation fold or test set
+    leaks into the model.
